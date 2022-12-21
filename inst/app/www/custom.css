@@ -1,0 +1,53 @@
+/*.cardlike
+  height: 150px
+  background-color:#C6F30C
+  border-size: 0px
+  border-radius: 10px
+  color: #000000
+  margin-left: 10px
+  margin-right: 10px */
+.colike {
+  height: 600px;
+  background-color: #008b8b;
+  border-size: 0px;
+  border-radius: 10px;
+  color: #000000;
+}
+
+.sidelike {
+  height: 1000px;
+  background-color: #008b8b;
+  border-size: 0px;
+  border-radius: 10px;
+  color: #000000;
+  padding: 10px;
+}
+
+.rank_btns {
+  background-color: green;
+  border-size: 0px;
+  color: white;
+  font-size: 0.7em;
+}
+
+.btn-light {
+  --bs-btn-active-bg: #ffffff;
+  --bs-btn-bg: #ffffff;
+}
+
+.filter-option-inner-inner {
+  color: #FFA500;
+}
+
+.bnr1 {
+  background-color: #390CF3;
+  color: #ffffff;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.bannerlike {
+  background-color: #03adfc;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}

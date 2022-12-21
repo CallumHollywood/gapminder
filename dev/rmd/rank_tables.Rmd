@@ -1,0 +1,93 @@
+---
+title: "map"
+output: html_document
+date: "2022-12-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+library(dplyr)
+library(gapminder)
+library(highcharter)
+library(reactable)
+
+
+```
+
+
+```{r}
+
+gapminder <- gapminder %>%
+  rename(name = country) %>%
+  mutate(name = as.character(name)) %>%
+  mutate(name = ifelse(name == 'United States', 'United States of America', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Rep.', 'Republic of Congo', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Dem. Rep.', 'Democratic Republic of the Congo', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Dem. Rep.', 'North Korea', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Rep.', 'South Korea', name)) %>%
+  mutate(name = ifelse(name == 'Serbia', 'Republic of Serbia', name)) %>%
+  mutate(name = ifelse(name == 'Tanzania', 'United Republic of Tanzania', name)) %>%
+  mutate(name = ifelse(name == 'Yemen, Rep.', 'Yemen', name)) %>%
+  mutate(name = ifelse(name == "Cote d'Ivoire", 'Ivory Coast', name)) %>%
+  mutate(name = ifelse(name == "Guinea-Bissau", 'Guinea Bissau', name))
+
+```
+
+
+
+
+
+```{r}
+
+countries <- as.character(sort(unique(gapminder$name)))
+
+```
+
+
+
+# rank
+
+```{r}
+
+
+rank_lifeExp <- gapminder %>% 
+  filter(year == 2007) %>% 
+  select(name, lifeExp) %>% 
+  arrange(desc(lifeExp)) %>% 
+  tibble::rownames_to_column('rank') %>% 
+  mutate(rank = as.numeric(rank)) %>% 
+  rename(country = name)
+
+rank_lifeExp
+
+```
+
+
+```{r}
+
+library(reactable)
+
+reactable(rank_lifeExp,
+          columns = list(
+            country = colDef(
+              style = function(country) {
+                if (country == 'Sweden') {
+                  color <- "#008000"
+                } else {
+                  color <- "#777"
+                }
+                list(color = color, fontWeight = "bold")
+              }
+            )
+          ))
+
+
+```
+
+
+

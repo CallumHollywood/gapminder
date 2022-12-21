@@ -1,0 +1,107 @@
+---
+title: "map"
+output: html_document
+date: "2022-12-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+library(dplyr)
+library(gapminder)
+library(highcharter)
+library(reactable)
+library(tibble)
+library(ggplot2)
+library(highcharter)
+
+```
+
+
+```{r}
+
+gapminder <- gapminder %>%
+  rename(name = country) %>%
+  mutate(name = as.character(name)) %>%
+  mutate(name = ifelse(name == 'United States', 'United States of America', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Rep.', 'Republic of Congo', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Dem. Rep.', 'Democratic Republic of the Congo', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Dem. Rep.', 'North Korea', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Rep.', 'South Korea', name)) %>%
+  mutate(name = ifelse(name == 'Serbia', 'Republic of Serbia', name)) %>%
+  mutate(name = ifelse(name == 'Tanzania', 'United Republic of Tanzania', name)) %>%
+  mutate(name = ifelse(name == 'Yemen, Rep.', 'Yemen', name)) %>%
+  mutate(name = ifelse(name == "Cote d'Ivoire", 'Ivory Coast', name)) %>%
+  mutate(name = ifelse(name == "Guinea-Bissau", 'Guinea Bissau', name))
+
+
+countries <- as.character(sort(unique(gapminder$name)))
+
+```
+
+
+
+
+
+```{r}
+
+country_focus_rctv <- tibble(
+  country = c('Albania','Algeria','Angola','Argentina'),
+  status = c('compare','compare','compare','focus')
+)
+
+country_focus_rctv
+
+```
+
+
+```{r}
+
+
+gapminder_compare <- gapminder %>% 
+  filter(name %in% country_focus_rctv$country)
+
+
+gapminder_compare
+
+```
+
+
+
+
+# rank
+
+```{r}
+
+gapminder_compare %>% 
+  ggplot(aes(year, lifeExp, color = name)) +
+  geom_line()
+
+
+
+
+
+```
+
+
+
+```{r}
+
+
+hchart(gapminder_compare,
+       "line",
+       hcaes(x = year, y = round(lifeExp, 1), group = name),
+       # name = "Continent",
+       dataLabels = list(enabled = TRUE, format = "{point.name}")
+) %>%
+  hc_title(text = 'Life Expectancy by Countries') %>%
+  hc_yAxis(title = list(text = "Life Expectancy (Years)")) %>%
+  hc_xAxis(title = list(text = NULL))
+
+```
+
+

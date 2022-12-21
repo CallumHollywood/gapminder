@@ -1,0 +1,237 @@
+---
+title: "map"
+output: html_document
+date: "2022-12-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+library(dplyr)
+library(gapminder)
+
+```
+
+
+```{r}
+
+gapminder <- gapminder %>%
+  rename(name = country) %>%
+  mutate(name = as.character(name)) %>%
+  mutate(name = ifelse(name == 'United States', 'United States of America', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Rep.', 'Republic of Congo', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Dem. Rep.', 'Democratic Republic of the Congo', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Dem. Rep.', 'North Korea', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Rep.', 'South Korea', name)) %>%
+  mutate(name = ifelse(name == 'Serbia', 'Republic of Serbia', name)) %>%
+  mutate(name = ifelse(name == 'Tanzania', 'United Republic of Tanzania', name)) %>%
+  mutate(name = ifelse(name == 'Yemen, Rep.', 'Yemen', name)) %>%
+  mutate(name = ifelse(name == "Cote d'Ivoire", 'Ivory Coast', name)) %>%
+  mutate(name = ifelse(name == "Guinea-Bissau", 'Guinea Bissau', name))
+
+```
+
+
+
+
+
+```{r}
+
+countries <- as.character(sort(unique(gapminder$name)))
+
+str(countries)
+
+tibble::tibble(
+  countries = countries
+)
+
+
+```
+
+
+```{r}
+
+library(highcharter)
+hcmap("custom/world", showInLegend = FALSE)
+
+
+```
+
+```{r}
+
+mapdata <- get_data_from_map(download_map_data("custom/world"))
+
+glimpse(mapdata)
+
+mapdata %>% 
+  select(name) %>% 
+  distinct() %>% 
+  arrange(name)
+
+```
+
+
+```{r}
+
+library(tidyr)
+
+population <- gapminder %>% 
+  select(name, year, pop) %>% 
+  pivot_wider(1:1, names_from = year, values_from = pop) %>% 
+  select(name, "2007") %>% 
+  rename(population = 2) %>% 
+  arrange() 
+# %>% 
+#   rename(name = country) %>% 
+#   mutate(name = as.character(name)) %>% 
+#   mutate(name = ifelse(name == 'United States', 'United States of America', name)) %>% 
+#   mutate(name = ifelse(name == 'Congo, Rep.', 'Republic of Congo', name)) %>% 
+#   mutate(name = ifelse(name == 'Congo, Dem. Rep.', 'Democratic Republic of the Congo', name)) %>% 
+#   mutate(name = ifelse(name == 'Korea, Dem. Rep.', 'North Korea', name)) %>% 
+#   mutate(name = ifelse(name == 'Korea, Rep.', 'South Korea', name)) %>% 
+#   mutate(name = ifelse(name == 'Serbia', 'Republic of Serbia', name)) %>% 
+#   mutate(name = ifelse(name == 'Tanzania', 'United Republic of Tanzania', name)) %>% 
+#   mutate(name = ifelse(name == 'Yemen, Rep.', 'Yemen', name)) %>% 
+#   mutate(name = ifelse(name == "Cote d'Ivoire", 'Ivory Coast', name)) %>% 
+#   mutate(name = ifelse(name == "Guinea-Bissau", 'Guinea Bissau', name))
+
+
+
+
+population
+
+sort(population$name[!population$name %in% mapdata$name])
+sort(mapdata$name[!mapdata$name %in% population$name])
+
+```
+
+```{r}
+
+
+hcmap("custom/world",
+      data = population,
+      value = "population",
+      joinBy = c("name", "name"),
+      name = "Population by Country",
+      dataLabels = list(enabled = TRUE, format = "{point.name}"),
+      borderColor = "#FAFAFA",
+      borderWidth = 0.1,
+      showInLegend = FALSE)
+
+
+```
+
+
+
+```{r}
+
+
+gap_country <- gapminder %>% 
+  filter(name == 'Sweden') %>% 
+  select(year, lifeExp)
+
+
+hchart(gap_country, "line", 
+       hcaes(x = year, y = lifeExp)
+) %>% 
+  hc_title(text = "Life Expectancy") %>% 
+  hc_yAxis(title = list(text = "Years")) %>% 
+  hc_xAxis(title = list(text = NULL))
+
+```
+
+
+
+
+```{r}
+
+
+fn_hchart <- function(metric, country, plottitle, ylab){
+  
+  fn_data <- gapminder %>% 
+    filter(name == country) %>% 
+    select('year', metric) %>% 
+    rename(metric_col = 2)
+
+  hchart(fn_data, "line",
+         hcaes(x = year, y = metric_col)
+  ) %>%
+    hc_title(text = plottitle) %>%
+    hc_yAxis(title = list(text = ylab)) %>%
+    hc_xAxis(title = list(text = NULL))
+  
+}
+
+
+
+
+
+fn_hchart('lifeExp', 'Sweden', "Life Expectancy", "Life Expectancy (Years)")
+fn_hchart('pop', 'United States of America', "Population", "Abundance")
+fn_hchart('gdpPercap', 'United States of America', "GDP per Capita", "USD")
+
+
+```
+
+
+
+```{r}
+
+    # gap_country_rctv <- reactive({
+    # 
+    # gapminder %>%
+    #   filter(name == input$Clicked) %>%
+    #   select(year, lifeExp)
+    # 
+    # })
+
+
+```
+
+
+# rank
+
+```{r}
+
+library(dplyr)
+
+gapminder %>% 
+  filter(year == 2007) %>% 
+  select(name, lifeExp) %>% 
+  arrange(desc(lifeExp)) %>% 
+  tibble::rownames_to_column('index') %>% 
+  filter(name == 'Sweden') %>% 
+  pull(index)
+
+
+
+```
+
+
+```{r}
+
+fn_country_metric_rank <- function(country, metric){
+  
+  gapminder %>% 
+  filter(year == 2007) %>% 
+  select(name, {{metric}}) %>% 
+  arrange(desc({{metric}})) %>%
+  tibble::rownames_to_column('index') %>%
+  filter(name == country) %>%
+  mutate(index = as.numeric(index)) %>%   
+  pull(index)
+  
+}
+
+fn_country_metric_rank('Sweden', lifeExp)
+fn_country_metric_rank('Sweden', pop)
+fn_country_metric_rank('Sweden', gdpPercap)
+
+```
+
+
+
