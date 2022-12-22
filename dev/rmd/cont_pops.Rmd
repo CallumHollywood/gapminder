@@ -1,0 +1,117 @@
+---
+title: "map"
+output: html_document
+date: "2022-12-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+library(dplyr)
+library(gapminder)
+library(highcharter)
+library(reactable)
+library(tibble)
+library(ggplot2)
+library(highcharter)
+
+```
+
+
+```{r}
+
+gapminder <- gapminder %>%
+  rename(name = country) %>%
+  mutate(name = as.character(name)) %>%
+  mutate(name = ifelse(name == 'United States', 'United States of America', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Rep.', 'Republic of Congo', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Dem. Rep.', 'Democratic Republic of the Congo', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Dem. Rep.', 'North Korea', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Rep.', 'South Korea', name)) %>%
+  mutate(name = ifelse(name == 'Serbia', 'Republic of Serbia', name)) %>%
+  mutate(name = ifelse(name == 'Tanzania', 'United Republic of Tanzania', name)) %>%
+  mutate(name = ifelse(name == 'Yemen, Rep.', 'Yemen', name)) %>%
+  mutate(name = ifelse(name == "Cote d'Ivoire", 'Ivory Coast', name)) %>%
+  mutate(name = ifelse(name == "Guinea-Bissau", 'Guinea Bissau', name))
+
+
+
+```
+
+
+
+```{r}
+
+world_pop <- gapminder %>% 
+  group_by(continent) %>% 
+  summarise(pop = sum(pop))
+
+world_pop 
+
+
+```
+
+
+
+
+```{r}
+
+hc <- hchart(
+  world_pop,
+  "packedbubble", 
+  hcaes(name = continent, value = pop, group = continent)
+  )
+
+q95 <- as.numeric(quantile(world_pop$pop, .95))
+
+hc %>% 
+  hc_tooltip(
+    useHTML = TRUE,
+    pointFormat = "<b>{point.name}:</b> {point.value}",
+    padding = 0
+  ) %>% 
+  hc_plotOptions(
+    packedbubble = list(
+      maxSize = "150%",
+      zMin = 0,
+      dataLabels = list(
+        enabled = F,
+        format = "{point.name}",
+        filter = list(
+          property = "y",
+          operator = ">",
+          value = q95
+        ),
+        style = list(
+          color = "black",
+          textOutline = "none",
+          fontWeight = "normal"
+        )
+      )
+    )
+  )
+
+```
+
+
+
+```{r}
+
+
+hchart(gapminder_compare,
+       "line",
+       hcaes(x = year, y = round(lifeExp, 1), group = name),
+       # name = "Continent",
+       dataLabels = list(enabled = TRUE, format = "{point.name}")
+) %>%
+  hc_title(text = 'Life Expectancy by Countries') %>%
+  hc_yAxis(title = list(text = "Life Expectancy (Years)")) %>%
+  hc_xAxis(title = list(text = NULL))
+
+```
+
+

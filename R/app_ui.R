@@ -25,10 +25,11 @@ app_ui <- function(request) {
     navbarPage(
       "Gapminder Analysis",
       id = 'nvpage',
-      selected = 'Country Profile',
+      selected = c('about', 'Country Profile')[1],
       theme = theme_test,
       tabPanel(
         "About",
+        value = 'about',
         mod_about_ui("about_1")
       ),
       tabPanel(

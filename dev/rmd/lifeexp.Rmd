@@ -1,0 +1,111 @@
+---
+title: "map"
+output: html_document
+date: "2022-12-19"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+library(dplyr)
+library(gapminder)
+library(highcharter)
+library(reactable)
+library(tibble)
+library(ggplot2)
+library(highcharter)
+
+```
+
+
+```{r}
+
+gapminder <- gapminder %>%
+  rename(name = country) %>%
+  mutate(name = as.character(name)) %>%
+  mutate(name = ifelse(name == 'United States', 'United States of America', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Rep.', 'Republic of Congo', name)) %>%
+  mutate(name = ifelse(name == 'Congo, Dem. Rep.', 'Democratic Republic of the Congo', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Dem. Rep.', 'North Korea', name)) %>%
+  mutate(name = ifelse(name == 'Korea, Rep.', 'South Korea', name)) %>%
+  mutate(name = ifelse(name == 'Serbia', 'Republic of Serbia', name)) %>%
+  mutate(name = ifelse(name == 'Tanzania', 'United Republic of Tanzania', name)) %>%
+  mutate(name = ifelse(name == 'Yemen, Rep.', 'Yemen', name)) %>%
+  mutate(name = ifelse(name == "Cote d'Ivoire", 'Ivory Coast', name)) %>%
+  mutate(name = ifelse(name == "Guinea-Bissau", 'Guinea Bissau', name))
+
+
+
+```
+
+
+
+```{r}
+
+lifeExp <- gapminder %>% 
+  select(name, lifeExp, year) %>% 
+  filter(year == 2007) %>% 
+  mutate(lifeExp = round(lifeExp, 1)) %>% 
+  arrange(desc(lifeExp))
+
+lifeExp <- lifeExp %>% 
+  head(5) %>% 
+  mutate(rank = 'Top 5 Country') %>% 
+  bind_rows(lifeExp %>% tail(5) %>% mutate(rank = 'Bottom 5 Country')) %>% 
+  select(-year)
+
+lifeExp
+
+```
+
+
+
+
+```{r}
+
+lifeExp
+
+
+```
+
+
+
+```{r}
+
+hchart(
+  lifeExp, 
+  "bar",
+  hcaes(x = name, y = lifeExp, group = rank),
+  color = c("#7CB5EC", "#F7A35C"),
+  # name = c("Year 1999", "Year 2008"),
+  showInLegend = c(TRUE)
+  ) %>% 
+  hc_yAxis(title = list(text = "Life Expectancy (Years)")) %>% 
+  hc_xAxis(title = list(text = "Country")) 
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

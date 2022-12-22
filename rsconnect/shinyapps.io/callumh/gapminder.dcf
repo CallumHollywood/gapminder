@@ -1,0 +1,11 @@
+name: gapminder
+title:
+username:
+account: callumh
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7931631
+bundleId: 6664098
+url: https://callumh.shinyapps.io/gapminder/
+when: 1671703807.50054
+lastSyncTime: 1671703807.50055

@@ -40,10 +40,91 @@ mod_about_ui <- function(id){
       column(6,
              div(class = 'colike',
                  align = 'center',
+                 style = 'padding: 10px;',
                  br(),
-                 h3('Life Expectancy by Continent'),
+                 fluidRow(
+                   column(6,
+                          div(class = 'bannerlike',
+                              div(class = 'bnr1',
+                                  fluidRow(
+                                    column(12,
+                                           align = 'center',
+                                           h6('Life Expectancy by Continent')
+                                    )
+                                  )
+                              ),
+                              br(),
+                              div(style = 'height: 240px; fontsize; 100px;',
+                                  fluidRow(
+                                    # column(6,
+                                    style = 'height: 100px;',
+                                    div(class = 'dv_height',
+                                        highchartOutput(ns('ot_intro_chart'), height = '250px')
+                                    )
+                                    # )
+                                  )
+                              )
+                          )
+
+                   ),
+                   column(6,
+                          div(class = 'bannerlike',
+                              div(class = 'bnr1',
+                                  fluidRow(
+                                    column(12,
+                                           align = 'center',
+                                           h6('Population by Continent')
+                                    )
+                                  )
+                              ),
+                              br(),
+                              div(style = 'height: 240px; fontsize; 100px;',
+                                  fluidRow(
+                                    # column(6,
+                                    style = 'height: 100px;',
+                                    div(class = 'dv_height',
+                                        highchartOutput(ns('ot_world_pop'), height = '250px')
+                                    )
+                                    # )
+                                  )
+                              )
+                          )
+
+                   )
+                 ),
                  br(),
-                 highchartOutput(ns('ot_intro_chart'), height = '450px')
+                 fluidRow(
+                   column(12,
+                          div(class = 'bannerlike',
+                              div(class = 'bnr1',
+                                  fluidRow(
+                                    column(12,
+                                           align = 'center',
+                                           h6('Life Expectancy, Top and Bottom 5 Countries')
+                                    )
+                                  )
+                              ),
+                              br(),
+                              div(style = 'height: 240px; fontsize; 100px;',
+                                  fluidRow(
+                                    # column(6,
+                                    style = 'height: 100px;',
+                                    div(class = 'dv_height',
+                                        highchartOutput(ns('ot_lifeexp_ranks'), height = '450px', width = '80%')
+                                    )
+                                    # )
+                                  )
+                              )
+                          )
+
+                   )
+                 )
+
+                 # fluidRow(
+                 #   column(12,
+                 #          highchartOutput(ns('ot_lifeexp_ranks'), height = '250px')
+                 #          )
+                 # )
              )
       )
     )
@@ -76,6 +157,97 @@ mod_about_server <- function(id){
         hc_xAxis(title = list(text = NULL))
 
     })
+
+
+
+    output$ot_world_pop <- renderHighchart({
+
+      world_pop <- gapminder %>%
+        group_by(continent) %>%
+        summarise(pop = sum(pop))
+
+
+      hc <- hchart(
+        world_pop,
+        "packedbubble",
+        hcaes(name = continent, value = pop, group = continent),
+        padding = 0
+      )
+
+      q95 <- as.numeric(quantile(world_pop$pop, .95))
+
+      hc %>%
+        hc_tooltip(
+          useHTML = F,
+          pointFormat = "<b>{point.name}:</b> {point.value}",
+          borderColor = 'black'
+        ) %>%
+        hc_plotOptions(
+          packedbubble = list(
+            maxSize = "150%",
+            zMin = 0,
+            dataLabels = list(
+              enabled = F,
+              format = "{point.name}",
+              filter = list(
+                property = "y",
+                operator = ">",
+                value = q95
+              ),
+              style = list(
+                color = "black",
+                textOutline = "none",
+                fontWeight = "normal",
+                borderColor = 'black'
+              )
+            )
+          )
+        )
+
+    })
+
+
+    output$ot_lifeexp_ranks <- renderHighchart({
+
+
+      lifeExp <- gapminder %>%
+        select(name, lifeExp, year) %>%
+        filter(year == 2007) %>%
+        mutate(lifeExp = round(lifeExp, 1)) %>%
+        arrange(desc(lifeExp))
+
+      lifeExp <- lifeExp %>%
+        head(5) %>%
+        mutate(rank = 'Top 5 Country') %>%
+        bind_rows(lifeExp %>% tail(5) %>% mutate(rank = 'Bottom 5 Country')) %>%
+        select(-year)
+
+      hchart(
+        lifeExp,
+        "bar",
+        hcaes(x = name, y = lifeExp, group = rank),
+        color = c("#7CB5EC", "#F7A35C"),
+        # name = c("Year 1999", "Year 2008"),
+        showInLegend = c(TRUE)
+      ) %>%
+        hc_yAxis(
+          title = list(text = "Life Expectancy (Years)", style = list(color = "#ffffff", fontSize = 25)),
+          labels = list(style = list(color = "#ffffff", fontSize = 25))
+          ) %>%
+        hc_xAxis(title = list(text = "Country", style = list(color = "#ffffff", fontSize = 40)),
+                 labels = list(style = list(color = "#ffffff", fontSize = 25))
+                 ) %>%
+        # hc_legend(labels = list(style = list(color = "#ffffff", maxHeight = 100)))
+        hc_legend(enabled = FALSE)
+
+
+    })
+
+
+
+
+
+
 
   })
 }

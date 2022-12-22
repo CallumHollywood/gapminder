@@ -17,6 +17,7 @@ Imports:
     golem (>= 0.3.5),
     highcharter,
     magrittr,
+    pkgload,
     reactable,
     readr,
     sass,
