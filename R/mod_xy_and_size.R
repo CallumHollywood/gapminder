@@ -58,11 +58,15 @@ mod_xy_and_size_server <- function(
         hc_tooltip(enabled = F) %>%
         hc_title(
           text = title_in,
-          style = list(color = "#000000", useHTML = TRUE)
-          ) %>%
+          margin = 20,
+          align = "left",
+          style = list(color = "#390CF3", useHTML = TRUE)
+        ) %>%
         hc_subtitle(
           text = subtitle_in,
-          style = list(color = "#000000", useHTML = TRUE)
+          margin = 20,
+          align = "left",
+          style = list(color = "#390CF3", useHTML = TRUE)
           ) %>%
         hc_xAxis(
           title = list(text = x_title_in, style = list(color = "#ffffff")),

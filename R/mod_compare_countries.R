@@ -55,7 +55,12 @@ mod_compare_countries_server <- function(
                hcaes(x = year, y = round(metric, 1), group = name),
                dataLabels = list(enabled = TRUE, format = "{point.name}")
         ) %>%
-          hc_title(text = title) %>%
+          hc_title(
+            text = title,
+            margin = 20,
+            align = "left",
+            style = list(color = "#390CF3", useHTML = TRUE)
+            ) %>%
           hc_yAxis(
             title = list(text = y_title, style = list(color = "#ffffff")),
             labels = list(style = list(color = "#ffffff"))

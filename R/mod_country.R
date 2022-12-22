@@ -13,6 +13,7 @@
 #' @import reactable
 #' @import shinyWidgets
 #' @importFrom gargoyle watch on trigger
+#' @importFrom tibble rownames_to_column
 
 
 gapminder <- readr::read_csv('inst/app/data/gapminder.csv') %>%
@@ -97,19 +98,12 @@ mod_country_ui <- function(id){
                    selected = 'Map',
                    inline = TRUE
                  ),
-                 div(style = 'height: 140px; fontsize; 100px;',
-                     fluidRow(
-                       column(6,
-                              uiOutput(ns('ot_slt_country')),
-                              ),
-                       column(6)
-                     )
-                 ),
-                 div(id = ns('dv_id1'), style = 'height: 800px; overflow-y: auto;',
+                 div(id = ns('dv_id1'),
+                     style = 'height: 250px; overflow-y: auto; overflow-x: hidden;',
                      conditionalPanel(condition = paste0('input[\'', ns('chckbx_picktype'), "\'] == \'Map\'"),
                                       column(1),
                                       column(10,
-                                             highchartOutput(ns('ot_world_pop'), height = '400px')
+                                             highchartOutput(ns('ot_world_pop'), height = '200px')
                                       ),
                                       column(1)
                      ),
@@ -158,7 +152,57 @@ mod_country_ui <- function(id){
                                         )
                                       )
                      )
+                 ),
+
+                 shinyjs::hidden(
+                div(id = ns('dv_sumamry'),
+                 div(class = 'bannerlike',
+                     div(class = 'bnr1',
+                         fluidRow(
+                           column(12,
+                                  align = 'center',
+                                  h4('Summary')
+                           )
+                         )
+                     ),
+                     br(),
+                     div(style = 'height: 240px; fontsize; 100px;',
+                         fluidRow(
+                           column(6,
+                                  style = 'height: 100px;',
+                                  # uiOutput(ns('ot_slt_country_title')),
+                                  h4('Rank Tables'),
+                                  uiOutput(ns('ot_slt_country')),
+                           ),
+                           column(6,
+                                  style = 'height: 100px;',
+                                  uiOutput(ns('ot_slt_guage_title')),
+                                  div(class = 'dv_height',
+                                      highchartOutput(ns('ot_pop_guage'))
+                                      )
+                           )
+                         )
+                     )
+                     )
                  )
+)
+
+
+                 # div(style = 'height: 140px; fontsize; 100px;',
+                 #     fluidRow(
+                 #       column(6,
+                 #              style = 'height: 100px;',
+                 #              uiOutput(ns('ot_slt_country_title')),
+                 #              uiOutput(ns('ot_slt_country')),
+                 #       ),
+                 #       column(6,
+                 #              style = 'height: 100px;',
+                 #              uiOutput(ns('ot_slt_guage_title')),
+                 #              highchartOutput(ns('ot_pop_guage'))
+                 #       )
+                 #     )
+                 # )
+
              )
       ),
       column(8,
@@ -258,6 +302,135 @@ mod_country_server <- function(
 ){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+
+
+
+
+    cont_country_summary_rctv <- reactive({
+
+      req(country_rctv())
+
+      country_fks   <- country_rctv() # 'Sweden'
+      continent_fks <- as.character(gapminder$continent[gapminder$name == country_fks])[1]
+
+
+      print(paste('country_fks ', country_fks))
+      print(paste('continent_fks ', continent_fks))
+
+      cont_country_summary <- gapminder %>%
+        filter(
+          year == 2007,
+          continent == continent_fks
+        ) %>%
+        group_by(continent, year) %>%
+        summarise(
+          lifeExp   = mean(lifeExp),
+          pop       = sum(pop),
+          gdpPercap = mean(gdpPercap)
+        ) %>%
+        ungroup() %>%
+        bind_rows(
+          gapminder %>%
+            filter(
+              year == 2007,
+              name == country_fks
+            )
+        )
+
+      print(cont_country_summary)
+      print(paste('cont_country_summary 1'))
+
+      cont_country_summary <- cont_country_summary %>%
+        mutate(name = ifelse(is.na(name), as.character(continent), name)) %>%
+        select(name, lifeExp, pop, gdpPercap) %>%
+        t() %>%
+        as.data.frame() %>%
+        rownames_to_column('id') %>%
+        setNames(c('id', 'Continent', 'Country'))
+
+
+      print(cont_country_summary)
+      print(paste('cont_country_summary 2'))
+
+      cont_country_summary <- cont_country_summary %>%
+        filter(id != 'name') %>%
+        mutate(
+          Continent = round(as.numeric(as.character(Continent)),2),
+          Country = round(as.numeric(as.character(Country)),2)
+        ) %>%
+        mutate(value = case_when(
+          id == 'lifeExp'    ~ round(Country - Continent, 2),
+          id == 'pop'        ~ Country / Continent * 100,
+          id == 'gdpPercap'  ~ round(Country - Continent, 2)
+        )) %>%
+        mutate(value = round(value, 2))
+
+
+
+      cont_country_summary
+
+    })
+
+
+    output$ot_pop_guage <- renderHighchart({
+
+
+
+      col_stops <- data.frame(
+        q = c(0.15, 0.4, .8),
+        c = c('#1bb51b', '#0b8f0b', '#046e04'),
+        stringsAsFactors = FALSE
+      )
+
+      highchart() %>%
+        hc_chart(type = "solidgauge") %>%
+        hc_pane(
+          startAngle = -90,
+          endAngle = 90,
+          background = list(
+            outerRadius = '100%',
+            innerRadius = '60%',
+            shape = "arc"
+          )
+        ) %>%
+        hc_tooltip(enabled = FALSE) %>%
+        hc_yAxis(
+          stops = list_parse2(col_stops),
+          lineWidth = 0,
+          minorTickWidth = 0,
+          tickAmount = 2,
+          min = 0,
+          max = 100,
+          labels = list(y = 26, style = list(fontSize = "22px"))
+        ) %>%
+        hc_add_series(
+          data = cont_country_summary_rctv()$value[2],
+          dataLabels = list(
+            y = -50,
+            borderWidth = 0,
+            useHTML = TRUE,
+            style = list(fontSize = "20px")
+          )
+        ) %>%
+        hc_size(height = 300)
+      # %>%
+      #   hc_title(text = '% of Continent Population')
+
+
+
+    })
+
+
+    observeEvent(cont_country_summary_rctv(),{
+
+      print(cont_country_summary_rctv())
+      message('cont_country_summary')
+
+
+    })
+
+
+
 
 
 
@@ -452,6 +625,18 @@ mod_country_server <- function(
 
         shinyjs::show("dv_country_compare")
 
+        print(country_rctv())
+        message('country_focus_rctv')
+
+        updatePickerInput(
+          session,
+          'slt_country',
+          label =  NULL,
+          # choices  = letters,
+          choices  = sort(unique(gapminder$name)),
+          selected = country_rctv()
+        )
+
         updatePrettyRadioButtons(
           session,
           'chckbx_picktype',
@@ -525,11 +710,31 @@ mod_country_server <- function(
       #
       # })
 
+      shinyjs::show('dv_sumamry')
+
+      output$ot_slt_guage_title <- renderUI({
+
+        req(country_rctv())
+
+        tagList(
+          h6('% Continent Population')
+        )
+
+      })
+
+      # output$ot_slt_country_title <- renderUI({
+      #
+      #   req(country_rctv())
+      #
+      #   tagList(
+      #     h4(country_rctv())
+      #   )
+      #
+      # })
 
       output$ot_slt_country <- renderUI({
 
         tagList(
-          h4(country_rctv()),
           br(),
           uiOutput(ns('ot_rank_lifeExp')),
           uiOutput(ns('ot_rank_pop')),
@@ -672,7 +877,7 @@ mod_country_server <- function(
     output$ot_banner_title <- renderUI({
 
       tagList(
-          paste0(country_rctv(), ' Through the Years')
+          h2(paste0(country_rctv(), ' Through the Years'))
       )
 
     })
