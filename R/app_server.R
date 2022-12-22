@@ -21,5 +21,6 @@ app_server <- function(input, output, session) {
   #### <<< CALL MODULES >>> ####
   mod_country_server("country_1", pass_around)
   mod_about_server("about_1")
+  mod_dashboard_details_server("dashboard_details_1")
 
 }

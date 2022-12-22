@@ -35,13 +35,18 @@ app_ui <- function(request) {
         "Country Profile",
         mod_country_ui("country_1")
       ),
-      navbarMenu(
-        "More",
-        tabPanel("Summary"),
-        "----",
-        "Section header",
-        tabPanel("Table")
+      tabPanel(
+        "Dashboard Details",
+        mod_dashboard_details_ui("dashboard_details_1")
       )
+
+      # navbarMenu(
+      #   "More",
+      #   tabPanel("Summary"),
+      #   "----",
+      #   "Section header",
+      #   tabPanel("Table")
+      # )
     )
     )
 }

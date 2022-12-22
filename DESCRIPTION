@@ -18,6 +18,7 @@ Imports:
     highcharter,
     magrittr,
     reactable,
+    readr,
     sass,
     shiny (>= 1.7.3),
     shinydashboard,
