@@ -63,7 +63,6 @@ fn_hchart <- function(metric, country, plottitle, ylab){
         colorByPoint = FALSE
       )
     )
-
 }
 
 
@@ -77,17 +76,13 @@ fn_country_metric_rank <- function(country, metric){
     filter(name == country) %>%
     mutate(index = as.numeric(index)) %>%
     pull(index)
-
 }
-
-
 
 mod_country_ui <- function(id){
   ns <- NS(id)
   tagList(
     fluidRow(
       column(4,
-             # offset = 1,
              align = 'center',
              div(class = 'sidelike',
                  prettyRadioButtons(
@@ -129,7 +124,6 @@ mod_country_ui <- function(id){
                                                )
                                         )
                                       ),
-                                      # br(),
                                       shinyjs::hidden(
                                         div(id = ns('dv_country_compare'),
                                             fluidRow(
@@ -153,56 +147,37 @@ mod_country_ui <- function(id){
                                       )
                      )
                  ),
-
                  shinyjs::hidden(
-                div(id = ns('dv_sumamry'),
-                 div(class = 'bannerlike',
-                     div(class = 'bnr1',
-                         fluidRow(
-                           column(12,
-                                  align = 'center',
-                                  h4('Summary')
-                           )
-                         )
-                     ),
-                     br(),
-                     div(style = 'height: 240px; fontsize; 100px;',
-                         fluidRow(
-                           column(6,
-                                  style = 'height: 100px;',
-                                  # uiOutput(ns('ot_slt_country_title')),
-                                  h4('Rank Tables'),
-                                  uiOutput(ns('ot_slt_country')),
+                   div(id = ns('dv_sumamry'),
+                       div(class = 'bannerlike',
+                           div(class = 'bnr1',
+                               fluidRow(
+                                 column(12,
+                                        align = 'center',
+                                        h4('Summary')
+                                 )
+                               )
                            ),
-                           column(6,
-                                  style = 'height: 100px;',
-                                  uiOutput(ns('ot_slt_guage_title')),
-                                  div(class = 'dv_height',
-                                      highchartOutput(ns('ot_pop_guage'))
-                                      )
+                           br(),
+                           div(style = 'height: 240px; fontsize; 100px;',
+                               fluidRow(
+                                 column(6,
+                                        style = 'height: 100px;',
+                                        h4('Rank Tables'),
+                                        uiOutput(ns('ot_slt_country')),
+                                 ),
+                                 column(6,
+                                        style = 'height: 100px;',
+                                        uiOutput(ns('ot_slt_guage_title')),
+                                        div(class = 'dv_height',
+                                            highchartOutput(ns('ot_pop_guage'))
+                                        )
+                                 )
+                               )
                            )
-                         )
-                     )
-                     )
+                       )
+                   )
                  )
-)
-
-
-                 # div(style = 'height: 140px; fontsize; 100px;',
-                 #     fluidRow(
-                 #       column(6,
-                 #              style = 'height: 100px;',
-                 #              uiOutput(ns('ot_slt_country_title')),
-                 #              uiOutput(ns('ot_slt_country')),
-                 #       ),
-                 #       column(6,
-                 #              style = 'height: 100px;',
-                 #              uiOutput(ns('ot_slt_guage_title')),
-                 #              highchartOutput(ns('ot_pop_guage'))
-                 #       )
-                 #     )
-                 # )
-
              )
       ),
       column(8,
@@ -235,49 +210,6 @@ mod_country_ui <- function(id){
                                   )
                                 )
                             )
-                            # fluidRow(
-                            #   column(4,
-                            #          align = 'center',
-                            #          div(class = 'cardlike',
-                            #              br(),
-                            #              h4('Life Expectancy')
-                            #              # ,
-                            #              # uiOutput(ns('ot_rank_lifeExp'))
-                            #
-                            #          )
-                            #   ),
-                            #   column(4,
-                            #          align = 'center',
-                            #          div(class = 'cardlike',
-                            #              br(),
-                            #              h4('Population')
-                            #              # ,
-                            #              # uiOutput(ns('ot_rank_pop'))
-                            #
-                            #          )
-                            #   ),
-                            #   column(4,
-                            #          align = 'center',
-                            #          div(class = 'cardlike',
-                            #              br(),
-                            #              h4('GDP per Capita')
-                            #              # ,
-                            #              # uiOutput(ns('ot_rank_gdpPercap'))
-                            #          )
-                            #   )
-                            # ),
-                            # br(),
-                            # fluidRow(
-                            #   column(4,
-                            #          highchartOutput(ns('ot_country_lifeExp'), height = '250px')
-                            #   ),
-                            #   column(4,
-                            #          highchartOutput(ns('ot_country_pop'))
-                            #   ),
-                            #   column(4,
-                            #          highchartOutput(ns('ot_country_gdpPercap'))
-                            #   )
-                            # )
                    ),
                    tabPanel(h4('Interplay'),
                             value = 'interplay',
@@ -305,17 +237,20 @@ mod_country_server <- function(
 
 
 
+    #### <<< reactiveVal >>> ####
+
+
+    country_compare_rctv <- reactiveVal('')
+    country_focus_rctv   <- reactiveVal('')
+
+    #### <<< reactives   >>> ####
 
     cont_country_summary_rctv <- reactive({
 
       req(country_rctv())
 
-      country_fks   <- country_rctv() # 'Sweden'
+      country_fks   <- country_rctv()
       continent_fks <- as.character(gapminder$continent[gapminder$name == country_fks])[1]
-
-
-      print(paste('country_fks ', country_fks))
-      print(paste('continent_fks ', continent_fks))
 
       cont_country_summary <- gapminder %>%
         filter(
@@ -337,9 +272,6 @@ mod_country_server <- function(
             )
         )
 
-      print(cont_country_summary)
-      print(paste('cont_country_summary 1'))
-
       cont_country_summary <- cont_country_summary %>%
         mutate(name = ifelse(is.na(name), as.character(continent), name)) %>%
         select(name, lifeExp, pop, gdpPercap) %>%
@@ -347,10 +279,6 @@ mod_country_server <- function(
         as.data.frame() %>%
         rownames_to_column('id') %>%
         setNames(c('id', 'Continent', 'Country'))
-
-
-      print(cont_country_summary)
-      print(paste('cont_country_summary 2'))
 
       cont_country_summary <- cont_country_summary %>%
         filter(id != 'name') %>%
@@ -365,16 +293,12 @@ mod_country_server <- function(
         )) %>%
         mutate(value = round(value, 2))
 
-
-
       cont_country_summary
 
     })
 
 
     output$ot_pop_guage <- renderHighchart({
-
-
 
       col_stops <- data.frame(
         q = c(0.15, 0.4, .8),
@@ -413,26 +337,11 @@ mod_country_server <- function(
           )
         ) %>%
         hc_size(height = 300)
-      # %>%
-      #   hc_title(text = '% of Continent Population')
-
-
 
     })
 
 
-    observeEvent(cont_country_summary_rctv(),{
-
-      print(cont_country_summary_rctv())
-      message('cont_country_summary')
-
-
-    })
-
-
-
-
-
+    #### <<< observeEvent >>> ####
 
     observeEvent(country_rctv(),{
 
@@ -449,10 +358,6 @@ mod_country_server <- function(
     })
 
 
-
-
-    country_compare_rctv <- reactiveVal('')
-    country_focus_rctv   <- reactiveVal('')
 
 
     observeEvent(input$slt_country_compare,{
@@ -497,9 +402,6 @@ mod_country_server <- function(
       pass_around$country_focus_rctv <- country_focus_rctv()
 
       trigger('trgr_country_focus')
-
-      print(country_focus_rctv())
-      message('country_focus_rctv()')
 
     }, ignoreInit = TRUE)
 
@@ -584,25 +486,13 @@ mod_country_server <- function(
 
       country_rctv(input$slt_country)
 
-      message('country_rctv wt input$slt_country')
-
     }, ignoreInit = TRUE)
 
     observeEvent(input$Clicked,{
 
       country_rctv(input$Clicked)
 
-      message('country_rctv wt input$Clicked')
-
     })
-
-
-    # observeEvent(country_rctv(),{
-    #
-    #   print(country_rctv())
-    #   message('country_rctv()')
-    #
-    # })
 
 
     #### <<< GARGOYLE ON >>> ####
@@ -625,14 +515,10 @@ mod_country_server <- function(
 
         shinyjs::show("dv_country_compare")
 
-        print(country_rctv())
-        message('country_focus_rctv')
-
         updatePickerInput(
           session,
           'slt_country',
           label =  NULL,
-          # choices  = letters,
           choices  = sort(unique(gapminder$name)),
           selected = country_rctv()
         )
@@ -646,18 +532,11 @@ mod_country_server <- function(
         )
       }
 
-
-
     })
 
     #### <<< OBSERVE EVENTS >>> ####
 
     observeEvent(input$tb_1,{
-
-
-
-    # })
-    # gargoyle::on('trgr_tb1',{
 
       if(input$tb_1 != 'interplay'){
 
@@ -672,43 +551,11 @@ mod_country_server <- function(
         )
 
       }
-      # else {
-      #
-      #   shinyjs::show("dv_country_compare")
-      #
-      #   updatePrettyRadioButtons(
-      #     session,
-      #     'chckbx_picktype',
-      #     choices = 'Picker',
-      #     selected = 'Picker',
-      #     inline = TRUE
-      #   )
-      # }
-
-
 
     }, ignoreInit = TRUE)
 
 
     observeEvent(country_rctv(),{
-
-      # output$ot_country_lifeExp <- renderHighchart({
-      #
-      #   fn_hchart('lifeExp', isolate(country_rctv()), "Life Expectancy", "Life Expectancy (Years)")
-      #
-      # })
-
-      # output$ot_country_pop <- renderHighchart({
-      #
-      #   fn_hchart('pop', isolate(country_rctv()), "Population", "Abundance")
-      #
-      # })
-
-      # output$ot_country_gdpPercap <- renderHighchart({
-      #
-      #   fn_hchart('gdpPercap', isolate(country_rctv()), "GDP per Capita", "USD")
-      #
-      # })
 
       shinyjs::show('dv_sumamry')
 
@@ -721,16 +568,6 @@ mod_country_server <- function(
         )
 
       })
-
-      # output$ot_slt_country_title <- renderUI({
-      #
-      #   req(country_rctv())
-      #
-      #   tagList(
-      #     h4(country_rctv())
-      #   )
-      #
-      # })
 
       output$ot_slt_country <- renderUI({
 
@@ -777,67 +614,6 @@ mod_country_server <- function(
     }, ignoreInit = TRUE)
 
 
-
-    # observeEvent(input$Clicked,{
-    #
-    #   output$ot_country_lifeExp <- renderHighchart({
-    #
-    #     fn_hchart('lifeExp', isolate(input$Clicked), "Life Expectancy", "Life Expectancy (Years)")
-    #
-    #   })
-    #
-    #   output$ot_country_pop <- renderHighchart({
-    #
-    #     fn_hchart('pop', isolate(input$Clicked), "Population", "Abundance")
-    #
-    #   })
-    #
-    #   output$ot_country_gdpPercap <- renderHighchart({
-    #
-    #     fn_hchart('gdpPercap', isolate(input$Clicked), "GDP per Capita", "USD")
-    #
-    #   })
-    #
-    #
-    #   output$ot_slt_country <- renderUI({
-    #
-    #     h4(input$Clicked)
-    #
-    #   })
-    #
-    #   output$ot_rank_lifeExp <- renderUI({
-    #
-    #     actionButton(ns('btn_rank_country_lifeExp'),
-    #                  label = paste0('Rank: ', fn_country_metric_rank(isolate(input$Clicked), lifeExp)),
-    #                  width = '80%',
-    #                  class = 'rank_btns'
-    #     )
-    #
-    #   })
-    #
-    #   output$ot_rank_pop <- renderUI({
-    #
-    #     actionButton(ns('btn_rank_country_pop'),
-    #                  label = paste0('Rank: ', fn_country_metric_rank(isolate(input$Clicked), pop)),
-    #                  width = '80%',
-    #                  class = 'rank_btns'
-    #     )
-    #
-    #   })
-    #
-    #   output$ot_rank_gdpPercap <- renderUI({
-    #
-    #     actionButton(ns('btn_rank_country_gdpPercap'),
-    #                  label = paste0('GDP Per Capita: ', fn_country_metric_rank(isolate(input$Clicked), gdpPercap)),
-    #                  width = '80%',
-    #                  class = 'rank_btns'
-    #     )
-    #
-    #   })
-    #
-    # }, ignoreInit = TRUE)
-
-
     observeEvent(input$btn_rank_country_lifeExp,{
 
       showModal(modalDialog(
@@ -877,7 +653,7 @@ mod_country_server <- function(
     output$ot_banner_title <- renderUI({
 
       tagList(
-          h2(paste0(country_rctv(), ' Through the Years'))
+        h2(paste0(country_rctv(), ' Through the Years'))
       )
 
     })
@@ -1040,58 +816,6 @@ mod_country_server <- function(
                 ))
 
     })
-
-
-
-    # output$ot_ranks_lifeExp <- renderReactable({
-    #
-    #   # req(input$Clicked)
-    #   req(country_rctv())
-    #
-    #   rank_lifeExp <- gapminder %>%
-    #     filter(year == 2007) %>%
-    #     select(name, lifeExp) %>%
-    #     arrange(desc(lifeExp)) %>%
-    #     tibble::rownames_to_column('rank') %>%
-    #     mutate(rank = as.numeric(rank)) %>%
-    #     rename(country = name)
-    #
-    #   reactable(rank_lifeExp,
-    #             columns = list(
-    #               country = colDef(
-    #                 style = function(country) {
-    #                   if (country == country_rctv()) {
-    #                     color <- "#ff0000"
-    #                   } else {
-    #                     color <- "#152d8c"
-    #                   }
-    #                   list(color = color, fontWeight = "bold")
-    #                 }
-    #               )
-    #               ,
-    #               rank = colDef(
-    #                 style = function(country) {
-    #                   if (country == country_rctv()) {
-    #                     color2 <- "#ff0000"
-    #                   } else {
-    #                     color2 <- "#152d8c"
-    #                   }
-    #                   list(color = color2, fontWeight = "normal")
-    #                 }
-    #               ),
-    #               lifeExp = colDef(
-    #                 style = function(country) {
-    #                   if (country == country_rctv()) {
-    #                     color3 <- "#ff0000"
-    #                   } else {
-    #                     color3 <- "#152d8c"
-    #                   }
-    #                   list(color = color3, fontWeight = "normal")
-    #                 }
-    #               )
-    #             ))
-    #
-    # })
 
 
     output$ot_world_pop <- renderHighchart({

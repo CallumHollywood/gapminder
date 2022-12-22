@@ -33,20 +33,6 @@ mod_country_review_ui <- function(id){
           )
         )
     )
-
-
-    # fluidRow(
-    #   column(4,
-    #          mod_xy_and_size_ui(ns("xy_and_size_1"))
-    #           ),
-    #   column(4,
-    #          mod_xy_and_size_ui(ns("xy_and_size_2"))
-    #   ),
-    #   column(4,
-    #          mod_xy_and_size_ui(ns("xy_and_size_3"))
-    #   )
-    #
-    # )
   )
 }
 
@@ -99,7 +85,6 @@ mod_country_review_server <- function(
       y_in = 'lifeExp',
       z_in = 'pop'
     )
-
 
   })
 }

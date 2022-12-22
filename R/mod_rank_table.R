@@ -77,9 +77,3 @@ mod_rank_table_server <- function(
     })
   })
 }
-
-## To be copied in the UI
-# mod_rak_table_ui("rank_table_1")
-
-## To be copied in the server
-# mod_rak_table_server("rank_table_1")

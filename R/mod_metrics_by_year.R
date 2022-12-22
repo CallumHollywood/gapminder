@@ -72,15 +72,5 @@ mod_metrics_by_year_server <- function(
 
     })
 
-
-    #
-
-
   })
 }
-
-## To be copied in the UI
-# mod_metrics_by_year_ui("metrics_by_year_1")
-
-## To be copied in the server
-# mod_metrics_by_year_server("metrics_by_year_1")

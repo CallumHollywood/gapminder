@@ -8,8 +8,6 @@
 #' @import sass
 #' @noRd
 
-# sass::sass(sass::sass_file("inst/app/www/custom.sass"))
-
 theme_test <- bs_theme(
   version = 5,
   bg = '#390CF3',
@@ -23,9 +21,7 @@ theme_test <- bs_theme(
 
 app_ui <- function(request) {
   tagList(
-    # Leave this function for adding external resources
     golem_add_external_resources(),
-    # Your application UI logic
     navbarPage(
       "Gapminder Analysis",
       id = 'nvpage',
@@ -70,8 +66,6 @@ golem_add_external_resources <- function() {
       path = app_sys("app/www"),
       app_title = "gapminder"
     ),
-    # Add here other external resources
-    # for example, you can add shinyalert::useShinyalert()
     shinyjs::useShinyjs()
   )
 }

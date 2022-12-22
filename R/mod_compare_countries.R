@@ -34,10 +34,6 @@ mod_compare_countries_server <- function(
 
       req(gapminder_compare_rctv())
 
-
-      print(gapminder_compare_rctv())
-      message('@# gapminder_compare_rctv')
-
       output$ot_compare_countries <- renderHighchart({
 
         req(gapminder_compare_rctv())
@@ -47,8 +43,6 @@ mod_compare_countries_server <- function(
         gapminder_compare_data <- gapminder_compare_data %>%
           select('name','year', metric_in) %>%
           rename(metric = 3)
-
-        # gapminder_compare_data
 
         hchart(gapminder_compare_data,
                "line",
@@ -73,10 +67,7 @@ mod_compare_countries_server <- function(
 
       })
 
-
     })
-
-
 
   })
 }

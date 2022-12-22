@@ -79,11 +79,3 @@ mod_xy_and_size_server <- function(
     })
   })
 }
-
-
-
-## To be copied in the UI
-# mod_xy_and_size_ui("xy_and_size_1")
-
-## To be copied in the server
-# mod_xy_and_size_server("xy_and_size_1")

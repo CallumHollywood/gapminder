@@ -38,16 +38,12 @@ mod_about_ui <- function(id){
 
       ),
       column(6,
-             # style = 'margin-top: 22px;',
-                 # offset = 2,
              div(class = 'colike',
-                 # column(10,
                  align = 'center',
                  br(),
                  h3('Life Expectancy by Continent'),
                  br(),
                  highchartOutput(ns('ot_intro_chart'), height = '450px')
-                 # )
              )
       )
     )
@@ -74,26 +70,12 @@ mod_about_server <- function(id){
       hchart(gap_contiment,
              "line",
              hcaes(x = year, y = round(lifeExp, 1), group = continent),
-             # name = "Continent",
              dataLabels = list(enabled = TRUE, format = "{point.name}")
       ) %>%
-        # hc_title(
-        #   text = 'Life Expectancy by Continent',
-        #   margin = 20,
-        #   align = "center",
-        #   style = list(color = "#000000", fontSize = '30px', useHTML = TRUE)
-        # ) %>%
         hc_yAxis(title = list(text = "Life Expectancy (Years)")) %>%
         hc_xAxis(title = list(text = NULL))
 
     })
 
-
   })
 }
-
-## To be copied in the UI
-# mod_about_ui("about_1")
-
-## To be copied in the server
-# mod_about_server("about_1")

@@ -14,7 +14,7 @@ app_server <- function(input, output, session) {
   init('trgr_country_focus')
 
 
-  #### <<< GARGOYLE INIT >>> ####
+  #### <<< environments >>> ####
   pass_around <- environment()
 
 
